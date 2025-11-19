@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eureka-service:
-    image: souidhoussem/eureka-service:latest
+    image: houssemsouid/eureka-service:latest
     ports:
       - "8761:8761"
     networks:
@@ -11,24 +11,34 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   gateway:
-    image: souidhoussem/gateway:latest
+    image: houssemsouid/gateway:latest
     ports:
       - "8080:8080"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
       - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
     depends_on:
       - eureka-service
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: any
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   analyse-service:
-    image: souidhoussem/analyse-service:latest
+    image: houssemsouid/analyse-service:latest
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
@@ -37,9 +47,14 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   billing-producer:
-    image: souidhoussem/billing-producer:latest
+    image: houssemsouid/billing-producer:latest
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
@@ -48,9 +63,14 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   billing-service:
-    image: souidhoussem/billing-service:latest
+    image: houssemsouid/billing-service:latest
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
@@ -59,9 +79,14 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   customer-service:
-    image: souidhoussem/customer-service:latest
+    image: houssemsouid/custmer-service:latest
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
@@ -70,9 +95,14 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   product-service:
-    image: souidhoussem/product-service:latest
+    image: houssemsouid/product-service:latest
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
     networks:
@@ -81,9 +111,14 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend:
-    image: souidhoussem/frontend:latest
+    image: houssemsouid/frontend:latest
     ports:
       - "80:80"
     networks:
@@ -92,6 +127,11 @@ services:
       replicas: 1
       restart_policy:
         condition: any
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   microservices-net:
