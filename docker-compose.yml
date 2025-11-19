@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  eureka-service:
+    image: souidhoussem/eureka-service:latest
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  gateway:
+    image: souidhoussem/gateway:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    depends_on:
+      - eureka-service
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  analyse-service:
+    image: souidhoussem/analyse-service:latest
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  billing-producer:
+    image: souidhoussem/billing-producer:latest
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  billing-service:
+    image: souidhoussem/billing-service:latest
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  customer-service:
+    image: souidhoussem/customer-service:latest
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  product-service:
+    image: souidhoussem/product-service:latest
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+  frontend:
+    image: souidhoussem/frontend:latest
+    ports:
+      - "80:80"
+    networks:
+      - microservices-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+
+networks:
+  microservices-net:
+    driver: overlay
